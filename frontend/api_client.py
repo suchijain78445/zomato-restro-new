@@ -4,9 +4,9 @@ import os
 # Prevent uvicorn/fastapi from loading (causes GZipResponder crash on Streamlit Cloud)
 sys.modules['uvicorn'] = None
 sys.modules['fastapi'] = None
+
 import asyncio
 import logging
-import os
 from typing import Any, Dict, List, Optional
 
 import httpx
@@ -61,11 +61,16 @@ class APIClient:
 
     def _get_direct_services(self):
         if self._repo is None:
-            from src.data.repository import RestaurantRepository
-            from src.services.recommendation_service import RecommendationService
+            try:
+                from src.data.repository import RestaurantRepository
+                from src.services.recommendation_service import RecommendationService
 
-            self._repo = RestaurantRepository()
-            self._rec_service = RecommendationService(self._repo)
+                self._repo = RestaurantRepository()
+                self._rec_service = RecommendationService(self._repo)
+            except Exception as e:
+                logger.error(f"Failed to load backend services: {e}")
+                self._repo = None
+                self._rec_service = None
         return self._repo, self._rec_service
 
     def _get_client(self) -> httpx.Client:
@@ -187,4 +192,3 @@ class APIClient:
                 f"Error executing recommendation in direct mode: {e}", exc_info=True
             )
             raise APIClientError(f"Recommendation engine error: {str(e)}")
-
