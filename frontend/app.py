@@ -87,7 +87,12 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-api_client = APIClient()
+@st.cache_resource
+def get_api_client():
+    return APIClient()
+
+
+api_client = get_api_client()
 
 
 @st.cache_data(ttl=600)
@@ -127,15 +132,20 @@ st.markdown(
 # Sidebar Preference Form
 st.sidebar.header("🎯 Preferences & Filters")
 
+if api_client.mode == "direct":
+    st.sidebar.caption("⚡ Mode: Standalone In-Memory Engine")
+else:
+    st.sidebar.caption("🌐 Mode: FastAPI Backend API")
+
 cities = load_cities()
 if not cities:
     st.sidebar.error(
-        "⚠️ Unable to connect to backend server. "
-        "Please ensure FastAPI is running on http://localhost:8000"
+        "⚠️ Unable to load dataset or connect to backend service."
     )
     selected_city = None
 else:
     selected_city = st.sidebar.selectbox("Select City *", options=cities, index=0)
+
 
 locations = load_locations(selected_city) if selected_city else []
 selected_location = st.sidebar.selectbox(

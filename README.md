@@ -92,12 +92,42 @@ streamlit run frontend/app.py
 - **Interactive API Docs (Swagger)**: [http://localhost:8000/docs](http://localhost:8000/docs)
 - **Frontend UI**: [http://localhost:8501](http://localhost:8501)
 
-#### Option B: Run via Docker Compose
+#### Option B: Run Standalone Streamlit App
+
+```bash
+streamlit run streamlit_app.py
+```
+
+#### Option C: Run via Docker Compose
 
 ```bash
 docker compose build
 docker compose up
 ```
+
+---
+
+## 🚀 Streamlit Cloud Deployment
+
+This repository is pre-configured for one-click deployment on **Streamlit Community Cloud**:
+
+1. **Push to GitHub**: Ensure your latest changes are pushed to your GitHub repository.
+2. **New App on Streamlit Cloud**:
+   - Go to [share.streamlit.io](https://share.streamlit.io) and click **"New app"**.
+   - Select your repository, branch (`main`), and set **Main file path** to:
+     ```text
+     streamlit_app.py
+     ```
+3. **Configure Secrets**:
+   - In Streamlit Cloud dashboard, navigate to **Settings > Secrets**.
+   - Paste your API key configuration (see `.streamlit/secrets.toml.example`):
+     ```toml
+     LLM_PROVIDER = "groq"
+     GROQ_API_KEY = "your-groq-api-key-here"
+     GROQ_MODEL = "llama-3.3-70b-versatile"
+     ```
+4. **Deploy**: Click **Deploy!** Streamlit Cloud will automatically install `requirements.txt`, initialize the dataset on boot, and run in standalone in-memory engine mode.
+
 
 ---
 

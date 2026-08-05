@@ -1,7 +1,24 @@
+import os
 from functools import lru_cache
 from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def _inject_streamlit_secrets() -> None:
+    """Safely populate os.environ from st.secrets if running inside Streamlit."""
+    try:
+        import streamlit as st
+
+        if hasattr(st, "secrets"):
+            for key, val in st.secrets.items():
+                if isinstance(val, (str, int, float, bool)):
+                    os.environ[key] = str(val)
+                elif isinstance(val, dict):
+                    for sub_k, sub_v in val.items():
+                        os.environ[f"{key.upper()}_{sub_k.upper()}"] = str(sub_v)
+    except Exception:
+        pass
 
 
 class Settings(BaseSettings):
@@ -32,10 +49,11 @@ class Settings(BaseSettings):
     DEFAULT_TOP_K: int = 5
 
 
-
 @lru_cache()
 def get_settings() -> Settings:
+    _inject_streamlit_secrets()
     return Settings()
 
 
 settings = get_settings()
+
