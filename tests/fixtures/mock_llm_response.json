@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    {
+      "restaurant_id": "r1",
+      "rank": 1,
+      "explanation": "Jalsa offers exceptional North Indian and Mughlai dishes with top ratings."
+    },
+    {
+      "restaurant_id": "r2",
+      "rank": 2,
+      "explanation": "Spice Elephant is budget-friendly with popular Chinese and Thai specialties."
+    }
+  ],
+  "summary": "Top choices for authentic dining matching your preferences."
+}

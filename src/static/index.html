@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Zomato AI Concierge - Gourmet Restaurant Recommendations</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "background": "#0b0e14",
+              "surface": "#10131a",
+              "surface-container-low": "#191c22",
+              "surface-container": "#1d2026",
+              "surface-container-high": "#272a31",
+              "surface-container-highest": "#32353c",
+              "surface-container-lowest": "#0b0e14",
+              "primary": "#E23744",
+              "primary-container": "#ff535a",
+              "on-primary-container": "#ffffff",
+              "secondary": "#8B5CF6",
+              "secondary-container": "#571bc1",
+              "tertiary": "#ffb95f",
+              "on-surface": "#e1e2eb",
+              "on-surface-variant": "#a0a4b8"
+            },
+            fontFamily: {
+              body: ["Plus Jakarta Sans", "sans-serif"]
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+        body {
+            background-color: #0b0e14;
+            color: #e1e2eb;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .ai-border {
+            border: 1px solid transparent;
+            background: linear-gradient(#10131a, #10131a) padding-box,
+                        linear-gradient(135deg, #E23744, #8B5CF6) border-box;
+        }
+        .pulse-glow {
+            animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.5); }
+            70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+        }
+        .shimmer-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(30deg);
+            animation: shimmer 3s infinite linear;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(30deg); }
+            100% { transform: translateX(100%) rotate(30deg); }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.15);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col antialiased selection:bg-primary selection:text-white">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-background/90 backdrop-blur-md fixed top-0 w-full z-50 border-b border-white/10 h-20 flex items-center px-4 md:px-8 justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-[0_0_15px_rgba(226,55,68,0.4)]">
+                <span class="material-symbols-outlined text-white text-2xl">restaurant</span>
+            </div>
+            <div>
+                <h1 class="font-bold text-xl md:text-2xl text-white tracking-tight flex items-center gap-2">
+                    Zomato <span class="text-primary font-black">AI Concierge</span>
+                </h1>
+                <p class="text-xs text-on-surface-variant hidden sm:block">Deterministic Filtering + LLM Cognitive Ranking</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <div id="status-pill" class="hidden md:flex items-center gap-2 bg-surface-container-low px-3 py-1.5 rounded-full border border-white/10 text-xs text-on-surface-variant">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-glow"></span>
+                <span id="api-status-text">Backend Connected</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="location.reload()" class="p-2 rounded-lg bg-surface-container-low text-on-surface-variant hover:text-white hover:bg-white/10 transition-colors" title="Refresh Page">
+                    <span class="material-symbols-outlined text-xl">refresh</span>
+                </button>
+                <a href="/docs" target="_blank" class="p-2 rounded-lg bg-surface-container-low text-on-surface-variant hover:text-white hover:bg-white/10 transition-colors" title="API Docs">
+                    <span class="material-symbols-outlined text-xl">api</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="pt-24 flex-grow flex flex-col md:flex-row gap-6 p-4 md:p-8 max-w-[1440px] mx-auto w-full">
+        
+        <!-- Left Sidebar: Controls & Preferences -->
+        <aside class="w-full md:w-[380px] lg:w-[420px] flex-shrink-0">
+            <div class="glass-panel rounded-2xl p-5 md:p-6 flex flex-col gap-5 sticky top-24 shadow-2xl">
+                <div>
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">tune</span> Search Criteria
+                    </h2>
+                    <p class="text-xs text-on-surface-variant mt-0.5">Customize real Zomato filters & AI intent prompt</p>
+                </div>
+
+                <!-- City Selector -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Target City</label>
+                    <div class="relative">
+                        <select id="city-select" class="w-full bg-[#06080A] border border-white/10 rounded-xl py-2.5 px-3.5 text-sm text-white appearance-none focus:ring-2 focus:ring-primary focus:outline-none cursor-pointer">
+                            <option value="">Loading Cities...</option>
+                        </select>
+                        <span class="material-symbols-outlined absolute right-3 top-2.5 pointer-events-none text-on-surface-variant">expand_more</span>
+                    </div>
+                </div>
+
+                <!-- Location Selector -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Neighborhood / Locality</label>
+                    <div class="relative">
+                        <select id="location-select" class="w-full bg-[#06080A] border border-white/10 rounded-xl py-2.5 px-3.5 text-sm text-white appearance-none focus:ring-2 focus:ring-primary focus:outline-none cursor-pointer">
+                            <option value="">All Neighborhoods</option>
+                        </select>
+                        <span class="material-symbols-outlined absolute right-3 top-2.5 pointer-events-none text-on-surface-variant">expand_more</span>
+                    </div>
+                </div>
+
+                <!-- Cuisine Filter Tags -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Cuisine Preferences</label>
+                    <div id="cuisines-container" class="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto custom-scrollbar p-1">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Budget Tier Chips -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Budget Classification</label>
+                    <div id="budget-container" class="flex rounded-xl overflow-hidden border border-white/10 bg-[#06080A] p-1 gap-1">
+                        <button data-budget="" class="budget-chip flex-1 py-1.5 text-xs font-semibold rounded-lg text-white bg-primary transition-all">Any</button>
+                        <button data-budget="low" class="budget-chip flex-1 py-1.5 text-xs font-semibold rounded-lg text-on-surface-variant hover:text-white transition-all">$ Low</button>
+                        <button data-budget="medium" class="budget-chip flex-1 py-1.5 text-xs font-semibold rounded-lg text-on-surface-variant hover:text-white transition-all">$$ Medium</button>
+                        <button data-budget="high" class="budget-chip flex-1 py-1.5 text-xs font-semibold rounded-lg text-on-surface-variant hover:text-white transition-all">$$$ High</button>
+                    </div>
+                </div>
+
+                <!-- Min Rating Slider -->
+                <div class="flex flex-col gap-1.5">
+                    <div class="flex justify-between items-center text-xs">
+                        <label class="font-semibold uppercase tracking-wider text-on-surface-variant">Minimum Rating</label>
+                        <span id="min-rating-val" class="font-bold text-tertiary">3.5+ ⭐</span>
+                    </div>
+                    <input id="min-rating-input" type="range" min="0" max="5" step="0.1" value="3.5" class="w-full accent-primary h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer"/>
+                </div>
+
+                <!-- Booking & Order Toggles -->
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="flex items-center justify-between p-2.5 rounded-xl bg-[#06080A] border border-white/10 cursor-pointer hover:bg-white/5 transition-colors">
+                        <span class="text-xs font-medium text-on-surface">Online Order</span>
+                        <input id="online-order-toggle" type="checkbox" class="rounded bg-surface border-white/20 text-primary focus:ring-primary h-4 w-4"/>
+                    </label>
+                    <label class="flex items-center justify-between p-2.5 rounded-xl bg-[#06080A] border border-white/10 cursor-pointer hover:bg-white/5 transition-colors">
+                        <span class="text-xs font-medium text-on-surface">Book Table</span>
+                        <input id="book-table-toggle" type="checkbox" class="rounded bg-surface border-white/20 text-primary focus:ring-primary h-4 w-4"/>
+                    </label>
+                </div>
+
+                <!-- Free-Text AI Prompt Notes -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-semibold uppercase tracking-wider text-secondary flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">auto_awesome</span> AI Culinary Preference Prompt
+                    </label>
+                    <textarea id="notes-input" class="w-full bg-[#06080A] border border-white/10 rounded-xl p-3 text-sm text-white focus:ring-2 focus:ring-secondary focus:outline-none h-20 resize-none placeholder:text-white/30" placeholder="e.g. Quiet romantic vibe for date night, great wood-fired pizza and craft cocktails..."></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <button id="generate-btn" class="shimmer-btn w-full py-3.5 rounded-xl bg-gradient-to-r from-primary via-primary to-secondary text-white font-bold text-sm uppercase tracking-wider hover:shadow-[0_0_25px_rgba(226,55,68,0.5)] active:scale-[0.99] transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-lg">auto_awesome</span>
+                    <span>Generate AI Recommendations</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Right Content Panel: Recommendations Feed -->
+        <section class="flex-grow flex flex-col gap-5">
+            
+            <!-- Summary Banner -->
+            <div id="summary-banner" class="glass-panel rounded-xl p-4 flex flex-wrap items-center justify-between gap-3 border-l-4 border-l-secondary shadow-lg">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <span id="total-matches-badge" class="text-xs font-semibold text-white bg-white/10 px-3 py-1 rounded-md">
+                        Dataset Ready
+                    </span>
+                    <span id="relaxed-constraints-badge" class="hidden text-xs text-amber-300 bg-amber-500/10 px-3 py-1 rounded-md border border-amber-500/20 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">tune</span> Filter Relaxed
+                    </span>
+                </div>
+                <div id="latency-badge" class="text-xs text-tertiary font-semibold flex items-center gap-1">
+                    <span>⚡ AI Concierge Ready</span>
+                </div>
+            </div>
+
+            <!-- Feed Container -->
+            <div id="recommendations-container" class="flex flex-col gap-4">
+                <!-- Initial Welcome State -->
+                <div class="glass-panel rounded-2xl p-12 flex flex-col items-center justify-center text-center gap-4">
+                    <div class="w-16 h-16 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary mb-2">
+                        <span class="material-symbols-outlined text-4xl">auto_awesome</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Your Personal AI Culinary Concierge</h3>
+                    <p class="text-sm text-on-surface-variant max-w-md">
+                        Select your preferred city, refine your search criteria, or enter custom cravings to experience AI-ranked recommendations backed by real Zomato dataset insights.
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Custom Frontend Logic -->
+    <script src="/static/app.js"></script>
+</body>
+</html>
