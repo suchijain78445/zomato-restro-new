@@ -11,4 +11,6 @@ if str(root_dir) not in sys.path:
     sys.path.insert(0, str(root_dir))
 
 # Import and launch the Streamlit frontend app
+import streamlit as st
+st.write("✅ App is loading...")
 import frontend.app  # noqa: F401, E402
