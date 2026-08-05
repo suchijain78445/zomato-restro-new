@@ -1,3 +1,9 @@
+import sys
+import os
+
+# Prevent uvicorn/fastapi from loading (causes GZipResponder crash on Streamlit Cloud)
+sys.modules['uvicorn'] = None
+sys.modules['fastapi'] = None
 import asyncio
 import logging
 import os
